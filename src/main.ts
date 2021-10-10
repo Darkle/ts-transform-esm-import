@@ -191,8 +191,6 @@ function importExportVisitor(
             break;
           }
 
-          // Check if `${resolver}/${import}/package.json` exists.
-          const packagePath = path.join(targetPath, 'package.json');
           log(`Checking if package.json "${targetFile}" exists`);
           if (fileExists(packagePath) && !r.sourceDir) {
             log(`Found package.json "${packagePath}"`);
