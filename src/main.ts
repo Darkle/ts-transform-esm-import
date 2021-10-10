@@ -148,6 +148,8 @@ function importExportVisitor(
             : (s) => getDestImportFromExternalJS(destDir, s);
           const indexJS = `index.${r.sourceDir ? 'ts' : 'js'}`;
 
+          let targetFile = addExt(path.join(r.dir, importPath));
+          
           // Check if `${resolver}/${import}/package.json` exists.
           const packagePath = path.join(targetPath, 'package.json');
           log(`Checking if package.json "${targetFile}" exists`);
@@ -172,7 +174,6 @@ function importExportVisitor(
           }          
           
           // Check if `${resolver}/${import}.(js|ts)` exists.
-          let targetFile = addExt(path.join(r.dir, importPath));
           log(`Checking if "${targetFile}" exists`);
           if (fileExists(targetFile)) {
             importPath = getDestImport(targetFile);
