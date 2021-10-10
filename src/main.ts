@@ -148,6 +148,29 @@ function importExportVisitor(
             : (s) => getDestImportFromExternalJS(destDir, s);
           const indexJS = `index.${r.sourceDir ? 'ts' : 'js'}`;
 
+          // Check if `${resolver}/${import}/package.json` exists.
+          const packagePath = path.join(targetPath, 'package.json');
+          log(`Checking if package.json "${targetFile}" exists`);
+          if (fileExists(packagePath) && !r.sourceDir) {
+            log(`Found package.json "${packagePath}"`);
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const pkgInfo = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+            if (pkgInfo) {
+              const pkgMain = pkgInfo.module as string;
+
+              targetFile = path.join(targetPath, pkgMain);
+              log(`Checking if main field "${targetFile}" exists`);
+              if (fileExists(targetFile)) {
+                importPath = getDestImport(targetFile);
+                resolved = true;
+                log(`Path resolved to "${importPath}"`);
+                break;
+              }
+            }
+          }          
+          
           // Check if `${resolver}/${import}.(js|ts)` exists.
           let targetFile = addExt(path.join(r.dir, importPath));
           log(`Checking if "${targetFile}" exists`);
@@ -182,8 +205,7 @@ function importExportVisitor(
                 `Unexpected empty package.json content in import "${importPath}", path "${packagePath}"`,
               );
             }
-            const pkgMain = (pkgInfo.module ??
-              pkgInfo.exports ??
+            const pkgMain = (pkgInfo.exports ??
               pkgInfo.main ??
               indexJS) as string;
 
